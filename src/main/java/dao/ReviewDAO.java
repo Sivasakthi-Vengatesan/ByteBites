@@ -1,0 +1,7 @@
+package dao;
+import database.DBConnection; import model.Review; import org.springframework.stereotype.Repository; import java.sql.*; import java.util.*;
+@Repository public class ReviewDAO {
+ public boolean addReview(Review v){try(Connection c=DBConnection.getConnection();PreparedStatement p=c.prepareStatement("INSERT INTO Review(food_id,customer_name,rating,review_text) VALUES(?,?,?,?)")){p.setInt(1,v.getFoodId());p.setString(2,v.getCustomerName());p.setInt(3,v.getRating());p.setString(4,v.getReviewText());return p.executeUpdate()>0;}catch(Exception e){e.printStackTrace();return false;}}
+ public List<Review> getReviewsByFoodId(int id){List<Review> l=new ArrayList<>();try(Connection c=DBConnection.getConnection();PreparedStatement p=c.prepareStatement("SELECT * FROM Review WHERE food_id=? ORDER BY review_date DESC")){p.setInt(1,id);try(ResultSet r=p.executeQuery()){while(r.next()){Review v=new Review();v.setReviewId(r.getInt("review_id"));v.setFoodId(r.getInt("food_id"));v.setCustomerName(r.getString("customer_name"));v.setRating(r.getInt("rating"));v.setReviewText(r.getString("review_text"));v.setReviewDate(r.getString("review_date"));l.add(v);}}}catch(Exception e){e.printStackTrace();}return l;}
+ public double getAverageRating(int id){try(Connection c=DBConnection.getConnection();PreparedStatement p=c.prepareStatement("SELECT AVG(rating) FROM Review WHERE food_id=?")){p.setInt(1,id);try(ResultSet r=p.executeQuery()){r.next();return r.getDouble(1);}}catch(Exception e){return 0;}}
+}
